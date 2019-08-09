@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <div style="margin-top:50px;text-align:center">
+        <h1>WebSocket Test</h1>
+        <input type="text" id="user" pattern="用户名称" />
+        <input type="button" id="conn" onclick="btn_conn()" value="连接" />
+        <input type="button" id="close" onclick="btn_close()" value="关闭" /><br />
+        <input type="text" id="content" pattern="内容" />
+        <input type="button" id="send" onclick="btn_send()" value="发送" />
+        <input type="button" id="clear" onclick="btn_clear()" value="清空" /><br />
+        <input type="text" id="to" />　：目标用户
+        <div id="msg"></div>
+    </div>
+    <script>
+        var ws;
+        //连接
+        function btn_conn() {
+            var msg = document.getElementById('msg');
+            var user = document.getElementById('user');
+            ws = new WebSocket('ws://' + window.location.hostname + ':' + window.location.port + '/Home/WSChat?user=' + user.value);
+            //ws = new WebSocket('ws://localhost:25356/Home/WSChat?user=' + $("#user").val());
+
+            msg.innerHTML += '<p>正在连接</p>';
+            ws.onopen = function () {
+                msg.innerHTML += '<p>已经连接</p>';
+            }
+            ws.onmessage = function (evt) {
+                msg.innerHTML += '<p>' + evt.data + '</p>';
+            }
+            ws.onerror = function (evt) {
+                msg.innerHTML += '<p>' + JSON.stringify(evt) + '</p>';
+            }
+            ws.onclose = function () {
+                msg.innerHTML += '<p>已经关闭</p>';
+            }
+        }
+        //关闭
+        function btn_close() {
+            ws.close();
+        }
+        //发送
+        function btn_send() {
+            var to = document.getElementById('to');
+            var content = document.getElementById('content');
+            var msg = document.getElementById('msg');
+            if (ws.readyState == WebSocket.OPEN) {
+                ws.send(to.value + "|" + content.value);
+            }
+            else {
+                msg.innerHTML = '<p>连接已经关闭</p>';
+            }
+        }
+        //清空
+        function btn_clear() {
+            var msg = document.getElementById('msg');
+            msg.innerHTML = '';
+        }
+    </script>
+</body>
+</html>
